@@ -1,0 +1,22 @@
+{
+    "terminate": {
+        "en": ["terminate yourself", "shut down"],
+        "de": ["beende dich"]
+    },
+    "clipboard_on": {
+        "en": ["clipboard on", "turn clipboard on"],
+        "de": ["zwischenablage einschalten", "zwischenablage ein"]
+    },
+    "clipboard_off": {
+        "en": ["clipboard off", "turn clipboard off"],
+        "de": ["zwischenablage ausschalten", "zwischenablage aus"]
+    },
+    "typing_on": {
+        "en": ["typing on", "enable typing"],
+        "de": ["tippen einschalten", "tippen ein"]
+    },
+    "typing_off": {
+        "en": ["typing off", "disable typing"],
+        "de": ["tippen ausschalten", "tippen aus"]
+    }
+}
