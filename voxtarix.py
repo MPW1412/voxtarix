@@ -49,7 +49,6 @@ class VoxtarixEngine:
             phrases = lang_phrases.get(language or "en", [])
             if isinstance(phrases, str):
                 phrases = [phrases]
-            print(f"Debug: Command {command}, Language {language or 'en'}, Phrases: {phrases}", file=sys.stderr)
             self.command_regexes[command] = [self.compile_command_regex(phrase) for phrase in phrases]
 
     def compile_command_regex(self, phrase):
@@ -223,7 +222,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Transkribiere Sprache mit Whisper.")
     parser.add_argument("-c", "--clipboard", action="store_true", help="Schreibe transkribierten Text in die Zwischenablage")
     parser.add_argument("-t", "--type", action="store_true", help="Simuliere Tastatureingaben für den transkribierten Text")
-    parser.add_argument("-l", "--language", type=str, default=None, help="Sprache für die Transkription (z.B. 'en', 'de')")
+    parser.add_argument("-l", "--language", type=str, default=None, help="Sprache für die Transkription und die Befehle (z.B. 'en', 'de')")
     args = parser.parse_args()
 
     engine = VoxtarixEngine(language=args.language)
