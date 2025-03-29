@@ -198,25 +198,10 @@ class VoxtarixEngine:
             dtype='float32'
         )
 
-        with self.stream:
-            self.processing_thread = threading.Thread(target=self.process_audio, daemon=True)
-            self.processing_thread.start()
-            print("Aufnahme läuft... (Strg+C zum Beenden)", file=sys.stderr)
-            try:
-                while True:
-                    if self.should_terminate:
-                        self.keyboard_controller = None
-                        self.stream.close()
-                        sys.exit(0)
-                    threading.Event().wait(0.1)
-            except KeyboardInterrupt:
-                print("Beende Aufnahme...", file=sys.stderr)
-                self.keyboard_controller = None
-            finally:
-                try:
-                    self.stream.close()
-                except Exception as e:
-                    print(f"Fehler beim Schließen des Streams: {e}", file=sys.stderr)
+        self.stream.start()
+        self.processing_thread = threading.Thread(target=self.process_audio, daemon=True)
+        self.processing_thread.start()
+        print("Aufnahme läuft... (Strg+C zum Beenden)", file=sys.stderr)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Transkribiere Sprache mit Whisper.")
@@ -229,3 +214,14 @@ if __name__ == "__main__":
     engine.use_clipboard = args.clipboard
     engine.use_typing = args.type
     engine.start()
+    try:
+        while not engine.should_terminate:
+            threading.Event().wait(0.1)
+    except KeyboardInterrupt:
+        print("Beende Aufnahme...", file=sys.stderr)
+        engine.should_terminate = True
+    finally:
+        if engine.stream:
+            engine.stream.stop()
+            engine.stream.close()
+        engine.keyboard_controller = None
