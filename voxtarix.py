@@ -12,8 +12,27 @@ from pynput import keyboard
 import json
 import configparser
 
+class EngineEvent:
+    pass
+
+class ClipboardStateChangedEvent(EngineEvent):
+    def __init__(self, enabled):
+        self.enabled = enabled
+
+class TypingStateChangedEvent(EngineEvent):
+    def __init__(self, enabled):
+        self.enabled = enabled
+
+class EngineTerminatedEvent(EngineEvent):
+    pass
+
+class TextRecognizedEvent(EngineEvent):
+    def __init__(self, text):
+        self.text = text
+
+
 class VoxtarixEngine:
-    def __init__(self, device="cuda", language=None):
+    def __init__(self, device="cuda", language=None, event_queue=None):
         config = configparser.ConfigParser()
         try:
             config.read('settings.conf')
@@ -34,6 +53,7 @@ class VoxtarixEngine:
         self.model = whisper.load_model(model_name, device=device)
         self.language = language
         self.audio_queue = queue.Queue()
+        self.event_queue = event_queue
         self.use_clipboard = False
         self.use_typing = False
         self.should_terminate = False
@@ -121,6 +141,8 @@ class VoxtarixEngine:
                 condition_on_previous_text=False
             )
             text = result["text"]
+            if self.event_queue:
+                self.event_queue.put(TextRecognizedEvent(text))
             if not text:
                 print("[Empty]", flush=True)
                 if self.use_clipboard:
@@ -155,18 +177,28 @@ class VoxtarixEngine:
                     if command == "terminate":
                         print("Terminating program on voice command...", file=sys.stderr)
                         self.should_terminate = True
+                        if self.event_queue:
+                            self.event_queue.put(EngineTerminatedEvent())
                     elif command == "clipboard_on":
                         self.use_clipboard = True
                         print("Clipboard enabled", file=sys.stderr)
+                        if self.event_queue:
+                            self.event_queue.put(ClipboardStateChangedEvent(True))
                     elif command == "clipboard_off":
                         self.use_clipboard = False
                         print("Clipboard disabled", file=sys.stderr)
+                        if self.event_queue:
+                            self.event_queue.put(ClipboardStateChangedEvent(False))
                     elif command == "typing_on":
                         self.use_typing = True
                         print("Typing enabled", file=sys.stderr)
+                        if self.event_queue:
+                            self.event_queue.put(TypingStateChangedEvent(True))
                     elif command == "typing_off":
                         self.use_typing = False
                         print("Typing disabled", file=sys.stderr)
+                        if self.event_queue:
+                            self.event_queue.put(TypingStateChangedEvent(False))
                     else:
                         if self.use_clipboard:
                             print(f"Attempting to copy: '{text}' to clipboard", file=sys.stderr)
