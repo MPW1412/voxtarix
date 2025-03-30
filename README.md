@@ -36,7 +36,7 @@
 ### Clone the Repository
 Clone the project from GitHub:
 ```bash
-git clone https://github.com/yourusername/voxtarix.git
+git clone https://github.com/mpw1412/voxtarix.git
 cd voxtarix
 ```
 
