@@ -4,6 +4,7 @@ import gi
 gi.require_version("Gtk", "3.0")
 gi.require_version("AppIndicator3", "0.1")
 from gi.repository import Gtk, AppIndicator3, GLib
+import locale
 import os
 import queue
 import sys
@@ -40,7 +41,19 @@ class VoxtarixApplet:
         self.icon_muted = os.path.abspath(os.path.join(os.path.dirname(__file__), "icon/voxtarix-white-muted.png"))
 
         try:
-            self.engine = VoxtarixEngine(language=None, event_queue=self.event_queue)
+            current_locale, _ = locale.getlocale(locale.LC_MESSAGES)
+            if current_locale:
+                language = current_locale.split('_')[0]
+            else:
+                language = "en"
+        except Exception as e:
+            print(f"Failed to detect GNOME language: {e}, falling back to 'en'", file=sys.stderr)
+            language = "en"
+
+        print(f"Detected GNOME language: {language}", file=sys.stderr)
+
+        try:
+            self.engine = VoxtarixEngine(language=language, event_queue=self.event_queue)
             self.engine.start()
             GLib.timeout_add(100, self.process_events)
         except Exception as e:
