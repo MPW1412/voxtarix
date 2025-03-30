@@ -57,6 +57,7 @@ class VoxtarixEngine:
         self.use_clipboard = False
         self.use_typing = False
         self.should_terminate = False
+        self.muted = False
         self.keyboard_controller = keyboard.Controller()
         self.stream = None
         self.processing_thread = None
@@ -134,6 +135,9 @@ class VoxtarixEngine:
                     speech_started = False
 
     def transcribe_and_handle(self, audio_buffer):
+        if self.muted:
+            print("Discarding audio input due to mute", file=sys.stderr)
+            return
         try:
             result = self.model.transcribe(
                 audio_buffer,

@@ -35,6 +35,10 @@ class VoxtarixApplet:
         self.event_queue = queue.Queue()
         self.engine = None
         self.history = []
+        self.muted = False
+        self.icon_unmuted = os.path.abspath(os.path.join(os.path.dirname(__file__), "icon/voxtarix-white.png"))
+        self.icon_muted = os.path.abspath(os.path.join(os.path.dirname(__file__), "icon/voxtarix-white-muted.png"))
+
         try:
             self.engine = VoxtarixEngine(language="de", event_queue=self.event_queue)
             self.engine.start()
@@ -45,6 +49,11 @@ class VoxtarixApplet:
 
     def build_menu(self):
         self.menu = Gtk.Menu()
+
+        self.mute_toggle = Gtk.CheckMenuItem(label="Mute")
+        self.mute_toggle.set_active(False)
+        self.mute_toggle.connect("toggled", self.on_mute_toggled)
+        self.menu.append(self.mute_toggle) 
 
         self.clipboard_toggle = Gtk.CheckMenuItem(label="Clipboard")
         self.clipboard_toggle.set_active(False)
@@ -67,6 +76,15 @@ class VoxtarixApplet:
 
         self.menu.show_all()
         return self.menu
+
+    def on_mute_toggled(self, widget):
+        self.muted = widget.get_active()
+        self.engine.muted = self.muted
+        print(f"Mute {'enabled' if self.muted else 'disabled'}", file=sys.stderr)
+        self.indicator.set_icon_full(
+            self.icon_muted if self.muted else self.icon_unmuted,
+            "Voxtarix Applet"
+        )
 
     def on_clipboard_toggled(self, widget):
         if self.engine:
