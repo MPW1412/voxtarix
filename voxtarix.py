@@ -143,7 +143,7 @@ class VoxtarixEngine:
         try:
             result = self.model.transcribe(
                 audio_buffer,
-                language=self.language,
+                language=None,
                 condition_on_previous_text=False
             )
             text = result["text"]
