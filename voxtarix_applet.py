@@ -40,7 +40,7 @@ class VoxtarixApplet:
         self.icon_muted = os.path.abspath(os.path.join(os.path.dirname(__file__), "icon/voxtarix-white-muted.png"))
 
         try:
-            self.engine = VoxtarixEngine(language="de", event_queue=self.event_queue)
+            self.engine = VoxtarixEngine(language=None, event_queue=self.event_queue)
             self.engine.start()
             GLib.timeout_add(100, self.process_events)
         except Exception as e:
