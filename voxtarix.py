@@ -6,6 +6,7 @@ import queue
 import threading
 import time
 import argparse
+import os
 import pyperclip
 import re
 from pynput import keyboard
@@ -33,9 +34,10 @@ class TextRecognizedEvent(EngineEvent):
 
 class VoxtarixEngine:
     def __init__(self, device="cuda", language=None, event_queue=None):
+        script_dir = os.path.dirname(os.path.abspath(__file__))
         config = configparser.ConfigParser()
         try:
-            config.read('settings.conf')
+            config_path = os.path.join(script_dir, 'settings.conf')
             self.SAMPLE_RATE = config.getint('audio', 'sample_rate', fallback=16000)
             self.CHANNELS = config.getint('audio', 'channels', fallback=1)
             self.BLOCKSIZE = config.getint('audio', 'blocksize', fallback=1024)
@@ -62,8 +64,8 @@ class VoxtarixEngine:
         self.stream = None
         self.processing_thread = None
 
-        # Load commands from translation file
-        with open("commands.json", "r") as f:
+        commands_path = os.path.join(script_dir, "commands.json")
+        with open(commands_path, "r") as f:
             commands_data = json.load(f)
         self.command_regexes = {}
         for command, lang_phrases in commands_data.items():
