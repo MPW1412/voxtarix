@@ -92,12 +92,11 @@ class VoxtarixApplet:
 
     def on_mute_toggled(self, widget):
         self.muted = widget.get_active()
-        self.engine.muted = self.muted
+        if self.engine:
+            self.engine.muted = self.muted
         print(f"Mute {'enabled' if self.muted else 'disabled'}", file=sys.stderr)
-        self.indicator.set_icon_full(
-            self.icon_muted if self.muted else self.icon_unmuted,
-            "Voxtarix Applet"
-        )
+        # Update icon with small delay to reduce GTK warnings
+        GLib.timeout_add(50, self.update_icon)
 
     def on_clipboard_toggled(self, widget):
         if self.engine:
@@ -131,6 +130,16 @@ class VoxtarixApplet:
             self.menu.insert(item, len(self.menu.get_children()) - 2)
 
         self.menu.show_all()
+
+    def update_icon(self):
+        try:
+            self.indicator.set_icon_full(
+                self.icon_muted if self.muted else self.icon_unmuted,
+                "Voxtarix Applet"
+            )
+        except Exception:
+            pass  # Ignore GTK warnings
+        return False  # Don't repeat timeout
 
     def quit(self, source):
         if self.engine and not self.engine.should_terminate:
